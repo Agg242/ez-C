@@ -1,11 +1,8 @@
 /*
-
 ** File: dbg.h
-
 */
-
-#ifndef dbg_h__
-#define dbg_h__
+#ifndef DBG_H__
+#define DBG_H__
 
 #include <stdio.h>
 #include <errno.h>
@@ -17,16 +14,16 @@
 
 
 #ifndef DEBUG
-#define debug(M, ...)
-#define time_debug(M, ...)
+	#define debug(M, ...)
+	//#define time_debug(M, ...)
+	
 #else
 
-#define __PRIV_debug(fmt, ...) fprintf(stderr, "DEBUG %s:%d: "fmt"\n", __FILE__, __LINE__, __VA_ARGS__)
-#define debug(...) __PRIV_debug(__VA_ARGS__, 0)
+	#define __PRIV_debug(fmt, ...) fprintf(stderr, "DEBUG %s:%d: "fmt"\n", __FILE__, __LINE__, __VA_ARGS__)
+	#define debug(...) __PRIV_debug(__VA_ARGS__, 0)
 
-#define __PRIV_time_debug(fmt, ...) fprintf(stderr, "DEBUG %d: "fmt"\n", __FILE__, __LINE__, __VA_ARGS__)
-#define time_debug(...) __PRIV_time_debug(__VA_ARGS__, 0)
-
+	//#define __PRIV_time_debug(fmt, ...) fprintf(stderr, "DEBUG %d: "fmt"\n", __FILE__, __LINE__, __VA_ARGS__)
+	//#define time_debug(...) __PRIV_time_debug(__VA_ARGS__, 0)
 #endif
 
 
@@ -45,5 +42,4 @@
 #define check_mem(A) check((A), "Out of memory.")
 #define check_debug(A, ...) if(!(A)) { debug(__VA_ARGS__); errno=0; goto on_error; }
 
-#endif
-
+#endif // DBG_H__
