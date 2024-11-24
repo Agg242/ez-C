@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define ASSIGNED(x) (x != NULL)
+#define ASSIGNED(x__) (NULL != x__)
 
 #if defined KDEBUG
 	#if defined __amigaos4__
@@ -18,20 +18,20 @@
 
 
 /*--- Assert during compiling (not run-time) ---*/
-#define compiler_assert(exp) extern char _compiler_assert[(exp)?1:-1]
+#define compiler_assert(exp__) extern char _compiler_assert[(exp__)?1:-1]
 
-#define __PRIV_log(lvl, fmt, ...) fprintf(stderr, "[" lvl "] (%s:%d: errno: %s) " fmt "\n", __FILE__, __LINE__, clean_errno(), __VA_ARGS__)
+#define __PRIV_log(lvl__, fmt__, ...) fprintf(stderr, "[" lvl__ "] (%s:%d: errno: %s) " fmt__ "\n", __FILE__, __LINE__, clean_errno(), __VA_ARGS__)
 
 #ifndef DEBUG
 	#define debug(M, ...)
-	#define hexdump(buffer, size)
+	#define hexdump(buffer__, size__)
 #else
 	#if defined KDEBUG && defined __amigaos4__
-		#define __PRIV_debug(fmt, ...) DebugPrintF("DEBUG %s:%d: "fmt"\n", __FILE__, __LINE__, __VA_ARGS__)
+		#define __PRIV_debug(fmt__, ...) DebugPrintF("DEBUG %s:%d: "fmt__"\n", __FILE__, __LINE__, __VA_ARGS__)
 		#undef __PRIV_log
-		#define __PRIV_log(lvl, fmt, ...) DebugPrintF("[" lvl "] (%s:%d: errno: %s) " fmt "\n", __FILE__, __LINE__, clean_errno(), __VA_ARGS__)
+		#define __PRIV_log(lvl__, fmt__, ...) DebugPrintF("[" lvl__ "] (%s:%d: errno: %s) " fmt__ "\n", __FILE__, __LINE__, clean_errno(), __VA_ARGS__)
 	#else
-		#define __PRIV_debug(fmt, ...) fprintf(stderr, "DEBUG %s:%d: "fmt"\n", __FILE__, __LINE__, __VA_ARGS__)
+		#define __PRIV_debug(fmt__, ...) fprintf(stderr, "DEBUG %s:%d: "fmt__"\n", __FILE__, __LINE__, __VA_ARGS__)
 	#endif
 	#define debug(...) __PRIV_debug(__VA_ARGS__, 0)
 #endif
@@ -45,56 +45,65 @@
 
 #define log_info(...) __PRIV_log("INFO", __VA_ARGS__, 0)
 
-#define check(A, ...) if(!(A)) { log_err(__VA_ARGS__); errno=0; goto on_error; }
+#define check(A__, ...) if(!(A__)) { log_err(__VA_ARGS__); errno=0; goto on_error; }
 #define sentinel(...)  { log_err(__VA_ARGS__); errno=0; goto on_error; }
-#define check_mem(A) check((A), "Out of memory.")
-#define check_debug(A, ...) if(!(A)) { debug(__VA_ARGS__); errno=0; goto on_error; }
+#define check_mem(A__) check((A__), "Out of memory.")
+#define check_debug(A__, ...) if(!(A__)) { debug(__VA_ARGS__); errno=0; goto on_error; }
  
 
 #define BYTES_PER_DUMP_LINE 16
+#define BYTES_PER_LONGWORD 4
 
-#define hexdump(buffer, len) do {\
-    char *ptr = (char *)buffer;\
-    int size = len;\
-    char ascii[BYTES_PER_DUMP_LINE + 1];\
-    int idx = 0;\
-    int ofs = 0;\
-    ascii[BYTES_PER_DUMP_LINE] = '\0';\
-    printf("%04x  ", ofs);\
-    while(size > 0)\
+#define hexdump(buffer__, len__) do {\
+    char *ptr__ = (char *)buffer__;\
+    int size__ = len__;\
+    int bytes__ = 0;\
+    char ascii__[BYTES_PER_DUMP_LINE + 1];\
+    int idx__ = 0;\
+    int ofs__ = 0;\
+    ascii__[BYTES_PER_DUMP_LINE] = '\0';\
+    printf("%04x: ", ofs__);\
+    while(size__ > 0)\
     {\
-        printf("%02hhx ", *ptr);\
-        if((*ptr >= ' ') && (*ptr <= '~'))\
+        printf("%02hhx", *ptr__);\
+        if((*ptr__ >= ' ') && (*ptr__ <= '~'))\
         {\
-            ascii[idx] = *ptr;\
+            ascii__[idx__] = *ptr__;\
         }\
         else\
         {\
-            ascii[idx] = '.';\
+            ascii__[idx__] = '.';\
         }\
-        idx++;\
-        ptr++;\
-        --size;\
-        if(idx == BYTES_PER_DUMP_LINE)\
+        idx__++;\
+        ptr__++;\
+        --size__;\
+        bytes__++;\
+        if(idx__ == BYTES_PER_DUMP_LINE)\
         {\
-            printf(" %s\n", ascii);\
-            if(size != 0)\
+            printf(" %s\n", ascii__);\
+            if(size__ != 0)\
             {\
-                ofs += BYTES_PER_DUMP_LINE;\
-                printf("%04x: ", ofs);\
+                ofs__ += BYTES_PER_DUMP_LINE;\
+                printf("%04x: ", ofs__);\
             }\
-            idx = 0;\
+            idx__ = 0;\
+            bytes__ = 0;\
+        }\
+        else if(BYTES_PER_LONGWORD == bytes__)\
+        {\
+            printf(" ");\
+            bytes__ = 0;\
         }\
     }\
-    if(idx != 0)\
+    if(idx__ != 0)\
     {\
-        ascii[idx] = '\0';\
-        while(idx < BYTES_PER_DUMP_LINE)\
+        ascii__[idx__] = '\0';\
+        while(idx__ < BYTES_PER_DUMP_LINE)\
         {\
             printf("   ");\
-            idx++;\
+            idx__++;\
         }\
-        printf(" %s\n", ascii);\
+        printf(" %s\n", ascii__);\
     }\
 } while(0)
 
