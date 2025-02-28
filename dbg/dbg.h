@@ -23,8 +23,7 @@
 #define __PRIV_log(lvl__, fmt__, ...) fprintf(stderr, "[" lvl__ "] (%s:%d: errno: %s) " fmt__ "\n", __FILE__, __LINE__, clean_errno(), __VA_ARGS__)
 
 #ifndef DEBUG
-	#define debug(M, ...)
-	#define hexdump(buffer__, size__)
+	#define debug(...)
 #else
 	#if defined KDEBUG && defined __amigaos4__
 		#define __PRIV_debug(fmt__, ...) DebugPrintF("DEBUG %s:%d: "fmt__"\n", __FILE__, __LINE__, __VA_ARGS__)
@@ -46,6 +45,8 @@
 #define log_info(...) __PRIV_log("INFO", __VA_ARGS__, 0)
 
 #define check(A__, ...) if(!(A__)) { log_err(__VA_ARGS__); errno=0; goto on_error; }
+#define check_err(A__, E__, ...) if(!(A__)) { log_err(__VA_ARGS__); errno=0; result=E__; goto on_error; }
+
 #define sentinel(...)  { log_err(__VA_ARGS__); errno=0; goto on_error; }
 #define check_mem(A__) check((A__), "Out of memory.")
 #define check_debug(A__, ...) if(!(A__)) { debug(__VA_ARGS__); errno=0; goto on_error; }
@@ -98,9 +99,10 @@
     if(idx__ != 0)\
     {\
         ascii__[idx__] = '\0';\
+        for(size__ = (BYTES_PER_DUMP_LINE - idx__ - 1) / BYTES_PER_LONGWORD; size__ > 0; size__--) printf(" ");\
         while(idx__ < BYTES_PER_DUMP_LINE)\
         {\
-            printf("   ");\
+            printf("  ");\
             idx__++;\
         }\
         printf(" %s\n", ascii__);\
